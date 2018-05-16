@@ -3,7 +3,7 @@ using SoupBinTCP.NET.Messages;
 
 namespace SoupBinTCP.NET
 {
-    public class ClientHandshakeHandler : ChannelHandlerAdapter
+    internal class ClientHandshakeHandler : ChannelHandlerAdapter
     {
         private readonly IClientListener _listener;
         private readonly LoginDetails _loginDetails;
