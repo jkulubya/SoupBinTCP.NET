@@ -68,7 +68,11 @@ namespace SoupBinTCP.NET
 
                 _cancellationToken.WaitHandle.WaitOne();
 
-                await _clientChannel.CloseAsync();
+                if (_clientChannel.Active)
+                {
+                    await _clientChannel.CloseAsync();
+
+                }
             }
             finally
             {
@@ -79,12 +83,18 @@ namespace SoupBinTCP.NET
         public async Task Send(Message message)
         {
             // TODO guard against sending when client isn't connected
-            await _clientChannel.WriteAndFlushAsync(message);
+            if (_clientChannel.Active)
+            {
+                await _clientChannel.WriteAndFlushAsync(message);
+            }
         }
 
         public async Task Shutdown()
         {
-            await _clientChannel.WriteAndFlushAsync(new LogoutRequest());
+            if (_clientChannel.Active)
+            {
+                await _clientChannel.WriteAndFlushAsync(new LogoutRequest());
+            }
             _cancellationTokenSource.Cancel();
         }
         
