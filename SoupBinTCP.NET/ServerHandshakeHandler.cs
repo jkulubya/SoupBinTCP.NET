@@ -16,7 +16,7 @@ namespace SoupBinTCP.NET
         protected override void ChannelRead0(IChannelHandlerContext ctx, LoginRequest msg)
         {
             var result = _listener.OnLoginRequest(msg.Username, msg.Password, msg.RequestedSession,
-                msg.RequestedSequenceNumber);
+                msg.RequestedSequenceNumber, ctx.Channel.Id.AsLongText());
             if (result.Success)
             {
                 ctx.Channel.Pipeline.Remove(this);
