@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Buffers;
@@ -23,6 +24,7 @@ namespace SoupBinTCP.NET
         private IChannel _serverChannel;
         private readonly DefaultChannelGroup
             _channelGroup = new DefaultChannelGroup("ALL", new SingleThreadEventLoop());
+        private readonly Dictionary<string, IChannel> _channels = new Dictionary<string, IChannel>();
 
         public Server(IServerListener listener)
         {
@@ -35,6 +37,11 @@ namespace SoupBinTCP.NET
         public void Start()
         {
             Task.Run(RunServerAsync);
+        }
+
+        public async Task Send(string channelId)
+        {
+            throw new NotImplementedException();
         }
         
         private async Task RunServerAsync()
@@ -53,6 +60,7 @@ namespace SoupBinTCP.NET
                     {
                         var pipeline = channel.Pipeline;
                         _channelGroup.Add(channel);
+                        _channels.Add(channel.Id.AsLongText(), channel);
                         //pipeline.AddLast(new LoggingHandler("CONN"));
                         
                         pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.BigEndian, ushort.MaxValue, 0, 2, 0,
