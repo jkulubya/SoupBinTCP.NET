@@ -11,6 +11,8 @@ using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging.Console;
+using SoupBinTCP.NET.Codecs;
+using SoupBinTCP.NET.Handlers;
 using SoupBinTCP.NET.Messages;
 
 namespace SoupBinTCP.NET
@@ -41,6 +43,22 @@ namespace SoupBinTCP.NET
             Task.Run(RunClientAsync);
         }
         
+        public async Task Send(UnsequencedData message)
+        {
+            if (_clientChannel.Active)
+            {
+                await _clientChannel.WriteAndFlushAsync(message);
+            }
+        }
+
+        public async Task Debug(string message)
+        {
+            if (_clientChannel.Active)
+            {
+                await _clientChannel.WriteAndFlushAsync(new Debug(message));
+            }
+        }
+        
         private async Task RunClientAsync()
         {
             var group = new MultithreadEventLoopGroup();
@@ -55,15 +73,16 @@ namespace SoupBinTCP.NET
                     .Handler(new ActionChannelInitializer<ISocketChannel>(channel =>
                     {
                         var pipeline = channel.Pipeline;
-                        pipeline.AddLast(new LoggingHandler(LogLevel.DEBUG));
-                        //pipeline.AddLast(new IdleStateHandler(15, 1, 0));
                         pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.BigEndian, ushort.MaxValue, 0, 2,
                             0, 0, true));
                         pipeline.AddLast(new LengthFieldPrepender(ByteOrder.BigEndian, 2, 0, false));
                         pipeline.AddLast(new SoupBinTcpMessageDecoder());
-                        //pipeline.AddLast(new ClientTimeoutHandler());
-                        pipeline.AddLast(new ClientHandler());
+                        pipeline.AddLast(new SoupBinTcpMessageEncoder());
+                        pipeline.AddLast(new IdleStateHandler(15, 1, 0));
+                        pipeline.AddLast(new ClientTimeoutHandler());
+                        pipeline.AddLast(new ClientHandler(_loginDetails, _listener));
                     }));
+                
                 _clientChannel = await bootstrap.ConnectAsync(new IPEndPoint(_ipAddress, _port));
 
                 _cancellationToken.WaitHandle.WaitOne();
@@ -80,15 +99,6 @@ namespace SoupBinTCP.NET
             }
         }
 
-        public async Task Send(Message message)
-        {
-            // TODO guard against sending when client isn't connected
-            if (_clientChannel.Active)
-            {
-                await _clientChannel.WriteAndFlushAsync(message);
-            }
-        }
-
         public async Task Shutdown()
         {
             if (_clientChannel.Active)
@@ -97,6 +107,5 @@ namespace SoupBinTCP.NET
             }
             _cancellationTokenSource.Cancel();
         }
-        
     }
 }

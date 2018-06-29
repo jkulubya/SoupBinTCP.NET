@@ -2,7 +2,7 @@
 using DotNetty.Transport.Channels;
 using SoupBinTCP.NET.Messages;
 
-namespace SoupBinTCP.NET
+namespace SoupBinTCP.NET.Handlers
 {
     internal class ClientTimeoutHandler : ChannelDuplexHandler
     {

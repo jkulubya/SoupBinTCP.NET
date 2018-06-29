@@ -9,8 +9,7 @@
         /// 
         /// </summary>
         /// <param name="success">True when the login operation is a success, false otherwise</param>
-        /// <param name="rejectionReason">True if not authorised (username/password combination wrong). False if requested session is invalid or unavailable</param>
-        public LoginStatus(bool success, RejectionReason rejectionReason)
+        public LoginStatus(bool success, RejectionReason rejectionReason = RejectionReason.NotAuthorised)
         {
             Success = success;
             RejectionReason = rejectionReason;

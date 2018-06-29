@@ -12,6 +12,8 @@ using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Groups;
 using DotNetty.Transport.Channels.Sockets;
 using Microsoft.Extensions.Logging.Console;
+using SoupBinTCP.NET.Codecs;
+using SoupBinTCP.NET.Handlers;
 using SoupBinTCP.NET.Messages;
 
 namespace SoupBinTCP.NET
@@ -28,7 +30,7 @@ namespace SoupBinTCP.NET
 
         public Server(IServerListener listener)
         {
-            InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
+            //InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
             _listener = listener;
@@ -39,9 +41,22 @@ namespace SoupBinTCP.NET
             Task.Run(RunServerAsync);
         }
 
-        public async Task Send(string channelId)
+        public async Task Send(SequencedData message, string channelId)
         {
-            throw new NotImplementedException();
+            if (_channels.TryGetValue(channelId, out var channel))
+            {
+                await channel.WriteAndFlushAsync(message);
+            }
+            //else throw error?
+        }
+
+        public async Task Debug(string message, string channelId)
+        {
+            if (_channels.TryGetValue(channelId, out var channel))
+            {
+                await channel.WriteAndFlushAsync(new Debug(message));
+            }
+            //else throw error
         }
         
         private async Task RunServerAsync()
@@ -55,28 +70,34 @@ namespace SoupBinTCP.NET
                 bootstrap
                     .Group(bossGroup, workerGroup)
                     .Channel<TcpServerSocketChannel>()
-                    .Handler(new LoggingHandler("LSTN"))
                     .ChildHandler(new ActionChannelInitializer<ISocketChannel>(channel =>
                     {
                         var pipeline = channel.Pipeline;
                         _channelGroup.Add(channel);
                         _channels.Add(channel.Id.AsLongText(), channel);
-                        //pipeline.AddLast(new LoggingHandler("CONN"));
-                        
                         pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.BigEndian, ushort.MaxValue, 0, 2, 0,
                             2, true));
+                        pipeline.AddLast(new LengthFieldPrepender(ByteOrder.BigEndian, 2, 0, false));
+                        //pipeline.AddLast(new LoggingHandler(""));
                         pipeline.AddLast(new SoupBinTcpMessageDecoder());
+                        pipeline.AddLast(new SoupBinTcpMessageEncoder());
                         pipeline.AddLast("LoginRequestFilter", new LoginRequestFilterHandler());
-                        pipeline.AddLast(new IdleStateHandler(15, 1, 0));
-                        pipeline.AddLast("ServerHandshakeTimeout", new ServerHandshakeTimeoutHandler());
+                        pipeline.AddLast("", new IdleStateHandler(15, 1, 0));
+                        pipeline.AddLast(new ServerTimeoutHandler(_listener));
                         pipeline.AddLast("ServerHandshake", new ServerHandshakeHandler(_listener));
-                        //pipeline.AddLast(new ServerTimeoutHandler());
-                        //pipeline.AddLast(new ServerHandler());
+                        //pipeline.AddLast(new ServerHandler()); // Added by server handshake handler
                     }));
-                
+
                 _serverChannel = await bootstrap.BindAsync(5500);
+                await _listener.OnServerListening();
                 _cancellationToken.WaitHandle.WaitOne();
-                await _serverChannel.CloseAsync();
+                if (_serverChannel.Active)
+                {
+                    await _channelGroup.WriteAndFlushAsync(new LogoutRequest());
+                    await _serverChannel.CloseAsync();
+                }
+
+                await _listener.OnServerDisconnect();
             }
             finally
             {
@@ -88,7 +109,6 @@ namespace SoupBinTCP.NET
 
         public async Task Shutdown()
         {
-            await _channelGroup.WriteAndFlushAsync(new LogoutRequest());
             _cancellationTokenSource.Cancel();
         }
     }

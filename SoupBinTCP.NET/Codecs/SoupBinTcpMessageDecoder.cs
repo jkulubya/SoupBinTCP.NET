@@ -4,13 +4,16 @@ using DotNetty.Buffers;
 using DotNetty.Codecs;
 using DotNetty.Transport.Channels;
 using SoupBinTCP.NET.Messages;
+using Debug = SoupBinTCP.NET.Messages.Debug;
 
-namespace SoupBinTCP.NET
+namespace SoupBinTCP.NET.Codecs
 {
     internal class SoupBinTcpMessageDecoder : ByteToMessageDecoder
     {
         protected override void Decode(IChannelHandlerContext context, IByteBuffer input, List<object> output)
         {
+            if(!input.IsReadable()) return;
+            
             var bytes = new byte[input.ReadableBytes];
             input.ReadBytes(bytes);
             var type = Convert.ToChar(bytes[0]);

@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 
 namespace SoupBinTCP.NET.Messages
 {
     public class UnsequencedData : Message
     {
+        public byte[] Message => Bytes.Skip(1).Take(Length - 1).ToArray();
+        
         public UnsequencedData(byte[] message)
         {
             const char type = 'U';

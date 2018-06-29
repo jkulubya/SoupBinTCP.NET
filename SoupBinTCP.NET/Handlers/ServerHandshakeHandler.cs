@@ -1,8 +1,7 @@
-﻿using DotNetty.Handlers.Timeout;
-using DotNetty.Transport.Channels;
+﻿using DotNetty.Transport.Channels;
 using SoupBinTCP.NET.Messages;
 
-namespace SoupBinTCP.NET
+namespace SoupBinTCP.NET.Handlers
 {
     internal class ServerHandshakeHandler: SimpleChannelInboundHandler<LoginRequest>
     {
@@ -20,8 +19,9 @@ namespace SoupBinTCP.NET
             if (result.Success)
             {
                 ctx.Channel.Pipeline.Remove(this);
-                ctx.Channel.Pipeline.AddLast(new ServerTimeoutHandler(), new ServerHandler());
-                ctx.WriteAndFlushAsync(new LoginAccepted(msg.RequestedSession, msg.RequestedSequenceNumber));
+                ctx.Channel.Pipeline.Remove("LoginRequestFilter");
+                ctx.Channel.Pipeline.AddLast(new ServerHandler(_listener));
+                ctx.WriteAsync(new LoginAccepted(msg.RequestedSession, msg.RequestedSequenceNumber));
             }
             else
             {
@@ -38,9 +38,20 @@ namespace SoupBinTCP.NET
                             reason = 'A';
                             break;
                 }
-                ctx.WriteAndFlushAsync(new LoginRejected(reason));
+                ctx.WriteAsync(new LoginRejected(reason));
                 ctx.CloseAsync();
             }
+        }
+        
+        public override void ChannelActive(IChannelHandlerContext context)
+        {
+            _listener.OnSessionStart(context.Channel.Id.AsLongText());
+        }
+
+
+        public override void ChannelReadComplete(IChannelHandlerContext context)
+        {
+            context.Flush();
         }
     }
 }
