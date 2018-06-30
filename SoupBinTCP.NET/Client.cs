@@ -4,13 +4,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetty.Buffers;
 using DotNetty.Codecs;
-using DotNetty.Common.Internal.Logging;
-using DotNetty.Handlers.Logging;
 using DotNetty.Handlers.Timeout;
 using DotNetty.Transport.Bootstrapping;
 using DotNetty.Transport.Channels;
 using DotNetty.Transport.Channels.Sockets;
-using Microsoft.Extensions.Logging.Console;
 using SoupBinTCP.NET.Codecs;
 using SoupBinTCP.NET.Handlers;
 using SoupBinTCP.NET.Messages;
@@ -35,7 +32,7 @@ namespace SoupBinTCP.NET
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
             _listener = listener;
-            InternalLoggerFactory.DefaultFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
+            _loginDetails = loginDetails;
         }
         
         public void Start()
@@ -43,11 +40,15 @@ namespace SoupBinTCP.NET
             Task.Run(RunClientAsync);
         }
         
-        public async Task Send(UnsequencedData message)
+        public async Task Send(byte[] message)
         {
+            if (message.Length > ushort.MaxValue - 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(message), "SoupBinTCP message payload exceeds maximum size (65534 bytes)");
+            }
             if (_clientChannel.Active)
             {
-                await _clientChannel.WriteAndFlushAsync(message);
+                await _clientChannel.WriteAndFlushAsync(new UnsequencedData(message));
             }
         }
 
@@ -74,7 +75,7 @@ namespace SoupBinTCP.NET
                     {
                         var pipeline = channel.Pipeline;
                         pipeline.AddLast(new LengthFieldBasedFrameDecoder(ByteOrder.BigEndian, ushort.MaxValue, 0, 2,
-                            0, 0, true));
+                            0, 2, true));
                         pipeline.AddLast(new LengthFieldPrepender(ByteOrder.BigEndian, 2, 0, false));
                         pipeline.AddLast(new SoupBinTcpMessageDecoder());
                         pipeline.AddLast(new SoupBinTcpMessageEncoder());
@@ -89,8 +90,9 @@ namespace SoupBinTCP.NET
 
                 if (_clientChannel.Active)
                 {
+                    await _clientChannel.WriteAndFlushAsync(new LogoutRequest());
                     await _clientChannel.CloseAsync();
-
+                    await _listener.OnDisconnect();
                 }
             }
             finally
@@ -99,12 +101,8 @@ namespace SoupBinTCP.NET
             }
         }
 
-        public async Task Shutdown()
+        public void Shutdown()
         {
-            if (_clientChannel.Active)
-            {
-                await _clientChannel.WriteAndFlushAsync(new LogoutRequest());
-            }
             _cancellationTokenSource.Cancel();
         }
     }

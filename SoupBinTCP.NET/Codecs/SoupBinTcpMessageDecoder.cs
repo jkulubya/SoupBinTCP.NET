@@ -16,43 +16,43 @@ namespace SoupBinTCP.NET.Codecs
             
             var bytes = new byte[input.ReadableBytes];
             input.ReadBytes(bytes);
-            var type = Convert.ToChar(bytes[0]);
+            var type = bytes[0];
+
             switch (type)
             {
-                case '+':
+                case 43:
                     output.Add(new Debug(bytes));
                     break;
-                case 'A':
+                case 65:
                     output.Add(new LoginAccepted(bytes));
                     break;
-                case 'J':
+                case 74:
                     output.Add(new LoginRejected(bytes));
                     break;
-                case 'S':
+                case 83:
                     output.Add(new SequencedData(bytes, true));
                     break;
-                case 'H':
+                case 72:
                     output.Add(new ServerHeartbeat(bytes));
                     break;
-                case 'Z':
+                case 90:
                     output.Add(new EndOfSession(bytes));
                     break;
-                case 'L':
+                case 76:
                     output.Add(new LoginRequest(bytes));
                     break;
-                case 'U':
+                case 85:
                     output.Add(new UnsequencedData(bytes, true));
                     break;
-                case 'R':
+                case 82:
                     output.Add(new ClientHeartbeat(bytes));
                     break;
-                case 'O':
+                case 79:
                     output.Add(new LogoutRequest(bytes));
                     break;
                 default:
                     break;
             }
-
         }
     }
 }

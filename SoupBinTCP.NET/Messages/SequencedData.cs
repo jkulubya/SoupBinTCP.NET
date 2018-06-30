@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Linq;
 
 namespace SoupBinTCP.NET.Messages
 {
     public class SequencedData : Message
     {
+        public byte[] Message => Bytes.Skip(1).Take(Length - 1).ToArray();
+
         public SequencedData(byte[] message)
         {
             const char type = 'S';

@@ -8,7 +8,7 @@ using SoupBinTCP.NET.Messages;
 
 namespace SoupBinTCP.NET.Handlers
 {
-    internal class ClientHandler : MessageToMessageEncoder<Message>
+    internal class ClientHandler : ChannelHandlerAdapter
     {
         private readonly IClientListener _listener;
         private readonly LoginDetails _loginDetails;
@@ -32,8 +32,8 @@ namespace SoupBinTCP.NET.Handlers
                 case LoginRejected msg:
                     _listener.OnLoginReject(msg.RejectReasonCode);
                     break;
-                case UnsequencedData msg:
-                    _listener.OnMessage(msg.Bytes);
+                case SequencedData msg:
+                    _listener.OnMessage(msg.Message);
                     break;
             }
         }
@@ -48,12 +48,6 @@ namespace SoupBinTCP.NET.Handlers
         public override void ChannelInactive(IChannelHandlerContext context)
         {
             _listener.OnDisconnect();
-        }
-
-        protected override void Encode(IChannelHandlerContext context, Message message, List<object> output)
-        {
-            var msg = Unpooled.WrappedBuffer(message.Bytes);
-            output.Add(msg);
         }
     }
 }
