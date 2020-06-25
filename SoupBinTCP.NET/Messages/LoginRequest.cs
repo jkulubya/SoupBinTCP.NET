@@ -1,18 +1,19 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class LoginRequest : Message
+    public class LoginRequest : IMessage
     {
-        public string Username => Encoding.ASCII.GetString(Bytes.Skip(1).Take(6).ToArray());
-        public string Password => Encoding.ASCII.GetString(Bytes.Skip(7).Take(10).ToArray());
-        public string RequestedSession => Encoding.ASCII.GetString(Bytes.Skip(17).Take(10).ToArray());
-        public ulong RequestedSequenceNumber =>
-            Convert.ToUInt64(Encoding.ASCII.GetString(Bytes.Skip(27).Take(20).ToArray()));
-        
-        public LoginRequest(string username, string password, string requestedSession = "", ulong requestedSequenceNumber = 0)
+        public MessageType MessageType { get; } = MessageType.LoginRequest;
+
+        public string Username { get; }
+        public string Password { get; }
+        public string RequestedSession { get; }
+        public ulong RequestedSequenceNumber { get; }
+
+        public LoginRequest(string username, string password, string requestedSession = "",
+            ulong requestedSequenceNumber = 0)
         {
             if (string.IsNullOrEmpty(username))
             {
@@ -23,7 +24,7 @@ namespace SoupBinTCP.NET.Messages
             {
                 throw new ArgumentNullException(nameof(password), "Password must be provided");
             }
-            
+
             if (username.Length > 6)
             {
                 throw new ArgumentOutOfRangeException(nameof(username),
@@ -35,25 +36,27 @@ namespace SoupBinTCP.NET.Messages
                 throw new ArgumentOutOfRangeException(nameof(password),
                     "Length of password parameter must be less than or equal to 6.");
             }
-            
+
             if (requestedSession.Length > 10)
             {
                 throw new ArgumentOutOfRangeException(nameof(requestedSession),
                     "Length of requestedSession parameter must be equal to 10.");
             }
 
-            const char type = 'L';
-            var seqNo = requestedSequenceNumber.ToString().PadLeft(20);
-            username = username.PadRight(6);
-            password = password.PadRight(10);
-            requestedSession = requestedSession.PadLeft(10);
-            var payload = type + username + password + requestedSession + seqNo;
-            Bytes = Encoding.ASCII.GetBytes(payload);
+            Username = username;
+            Password = password;
+            RequestedSession = requestedSession;
+            RequestedSequenceNumber = requestedSequenceNumber;
         }
-        
-        internal LoginRequest(byte[] bytes)
+
+        internal LoginRequest(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
+            throw new NotImplementedException();
+        }
+
+        byte[] IMessage.GetPayloadBytes()
+        {
+            throw new NotImplementedException();
         }
     }
 }

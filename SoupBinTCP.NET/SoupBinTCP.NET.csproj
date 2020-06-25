@@ -1,13 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="DotNetty.Codecs" Version="0.4.8" />
-    <PackageReference Include="DotNetty.Common" Version="0.4.8" />
-    <PackageReference Include="DotNetty.Handlers" Version="0.4.8" />
-    <PackageReference Include="DotNetty.Transport" Version="0.4.8" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="1.1.1" />
+    <PackageReference Include="Bedrock.Framework" Version="0.1.58-alpha.g6983000a5c" />
   </ItemGroup>
 </Project>

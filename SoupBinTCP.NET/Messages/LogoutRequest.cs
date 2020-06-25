@@ -1,18 +1,20 @@
-﻿using System.Text;
+﻿using System;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class LogoutRequest : Message
+    public class LogoutRequest : IMessage
     {
+        public MessageType MessageType { get; } = MessageType.LogoutRequest;
+
         public LogoutRequest()
         {
-            const char type = 'O';
-            Bytes = Encoding.ASCII.GetBytes(new[] {type});
         }
-        
-        internal LogoutRequest(byte[] bytes)
+
+        internal LogoutRequest(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
         }
+
+        byte[] IMessage.GetPayloadBytes() => Array.Empty<byte>();
     }
 }

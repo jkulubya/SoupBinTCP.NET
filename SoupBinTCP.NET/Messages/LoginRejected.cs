@@ -1,26 +1,25 @@
 ﻿using System;
-using System.Text;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class LoginRejected : Message
+    public class LoginRejected : IMessage
     {
-        public char RejectReasonCode => Convert.ToChar(Bytes[3]);
-        public LoginRejected(char rejectReasonCode)
-        {
-            if (rejectReasonCode != 'A' && rejectReasonCode != 'S')
-            {
-                throw new ArgumentException("Reject reason code must be either A or S", nameof(rejectReasonCode));
-            }
+        public MessageType MessageType { get; } = MessageType.LoginRejected;
+        public RejectReason RejectReason { get; }
 
-            const char type = 'J';
-            var payload = new string(new[] {type, rejectReasonCode});
-            Bytes = Encoding.ASCII.GetBytes(payload);
+        public LoginRejected(RejectReason reason)
+        {
+            RejectReason = reason;
         }
 
-        internal LoginRejected(byte[] bytes)
+        internal LoginRejected(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
+        }
+
+        byte[] IMessage.GetPayloadBytes()
+        {
+            throw new NotImplementedException();
         }
     }
 }

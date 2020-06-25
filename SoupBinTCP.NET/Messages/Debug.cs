@@ -1,23 +1,27 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class Debug : Message
+    public class Debug : IMessage
     {
-        public string Text => Encoding.ASCII.GetString((Bytes.Skip(1).Take(Length - 1).ToArray()));
+        public MessageType MessageType { get; } = MessageType.Debug;
+
+        public string Text { get; }
 
         public Debug(string text)
         {
-            const char type = '+';
-            var payload = type + text;
-            Bytes = Encoding.ASCII.GetBytes(payload);
+            Text = text;
         }
 
-        internal Debug(byte[] bytes)
+        internal Debug(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
+            throw new NotImplementedException();
+        }
+
+        byte[] IMessage.GetPayloadBytes()
+        {
+            throw new NotImplementedException();
         }
     }
 }

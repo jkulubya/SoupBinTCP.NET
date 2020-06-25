@@ -3,12 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 #
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoupBinTCP.NET", "SoupBinTCP.NET\SoupBinTCP.NET.csproj", "{7D6E225C-DC64-4D4A-BA80-A919F40805AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{3FBF5B91-ADB2-48C2-864B-3DCB6029ADF2}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "examples\Client\Client.csproj", "{442C47B9-041A-4F67-9EA7-DC9E04EDBB5E}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Server", "examples\Server\Server.csproj", "{D5C3EDA9-4730-4A00-933C-A1FCABA0C8BC}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,17 +13,5 @@ Global
 		{7D6E225C-DC64-4D4A-BA80-A919F40805AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D6E225C-DC64-4D4A-BA80-A919F40805AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D6E225C-DC64-4D4A-BA80-A919F40805AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3FBF5B91-ADB2-48C2-864B-3DCB6029ADF2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3FBF5B91-ADB2-48C2-864B-3DCB6029ADF2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3FBF5B91-ADB2-48C2-864B-3DCB6029ADF2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3FBF5B91-ADB2-48C2-864B-3DCB6029ADF2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{442C47B9-041A-4F67-9EA7-DC9E04EDBB5E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{442C47B9-041A-4F67-9EA7-DC9E04EDBB5E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{442C47B9-041A-4F67-9EA7-DC9E04EDBB5E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{442C47B9-041A-4F67-9EA7-DC9E04EDBB5E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D5C3EDA9-4730-4A00-933C-A1FCABA0C8BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D5C3EDA9-4730-4A00-933C-A1FCABA0C8BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D5C3EDA9-4730-4A00-933C-A1FCABA0C8BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D5C3EDA9-4730-4A00-933C-A1FCABA0C8BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

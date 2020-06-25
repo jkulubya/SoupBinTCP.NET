@@ -1,28 +1,28 @@
 ﻿using System;
-using System.Linq;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class UnsequencedData : Message
+    public class UnsequencedData : IMessage
     {
-        public byte[] Message => Bytes.Skip(1).Take(Length - 1).ToArray();
-        
+        public MessageType MessageType { get; }
+
+        private readonly byte[] _message;
+        public ReadOnlyMemory<byte> Message => _message;
+
         public UnsequencedData(byte[] message)
         {
-            const char type = 'U';
-            var messageLength = message.Length;
-            var payload = new byte[messageLength + 1];
-            payload[0] = Convert.ToByte(type);
-            Array.Copy(message, 0, payload, 1, messageLength);
-            Bytes = payload;
+            _message = message;
         }
-        
-        internal UnsequencedData(byte[] bytes, bool addToBytesDirectly)
+
+        internal UnsequencedData(ReadOnlySequence<byte> payload)
         {
-            if (addToBytesDirectly)
-            {
-                Bytes = bytes;
-            }
+            throw new NotImplementedException();
+        }
+
+        byte[] IMessage.GetPayloadBytes()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,18 +1,20 @@
-﻿using System.Text;
+﻿using System;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class EndOfSession : Message
+    public class EndOfSession : IMessage
     {
+        public MessageType MessageType { get; } = MessageType.EndOfSession;
+
         public EndOfSession()
         {
-            const char type = 'Z';
-            Bytes = Encoding.ASCII.GetBytes(new[] {type});
         }
 
-        internal EndOfSession(byte[] bytes)
+        internal EndOfSession(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
         }
+
+        byte[] IMessage.GetPayloadBytes() => Array.Empty<byte>();
     }
 }

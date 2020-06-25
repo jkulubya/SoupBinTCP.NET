@@ -1,32 +1,33 @@
 ﻿using System;
-using System.Linq;
-using System.Text;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class LoginAccepted : Message
+    public class LoginAccepted : IMessage
     {
-        public string Session => Encoding.ASCII.GetString((Bytes.Skip(3).Take(10).ToArray()));
-        public ulong SequenceNumber => Convert.ToUInt64(Encoding.ASCII.GetString((Bytes.Skip(13).Take(20).ToArray())));
+        public MessageType MessageType { get; } = MessageType.LoginAccepted;
+        public string Session { get; }
+        public ulong SequenceNumber { get; }
 
         public LoginAccepted(string session, ulong sequenceNumber)
         {
             if (session.Length > 10)
             {
-                throw new ArgumentOutOfRangeException(session, "Session must have maximum length 10");
+                throw new ArgumentOutOfRangeException(nameof(session), "Session must have maximum length 10");
             }
 
-            const char type = 'A';
-            var seqNo = sequenceNumber.ToString();
-            seqNo = seqNo.PadLeft(20);
-            var payload = type + session + seqNo;
-            Bytes = Encoding.ASCII.GetBytes(payload);
+            Session = session;
+            SequenceNumber = sequenceNumber;
         }
 
-        internal LoginAccepted(byte[] bytes)
+        internal LoginAccepted(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
+            throw new NotImplementedException();
         }
-        
+
+        byte[] IMessage.GetPayloadBytes()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

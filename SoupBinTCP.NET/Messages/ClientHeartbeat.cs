@@ -1,19 +1,20 @@
 ﻿using System;
-using System.Text;
+using System.Buffers;
 
 namespace SoupBinTCP.NET.Messages
 {
-    public class ClientHeartbeat : Message
+    public class ClientHeartbeat : IMessage
     {
+        public MessageType MessageType { get; } = MessageType.ClientHeartbeat;
+
         public ClientHeartbeat()
         {
-            const char type = 'R';
-            Bytes = Encoding.ASCII.GetBytes(new[] {type});
         }
 
-        internal ClientHeartbeat(byte[] bytes)
+        internal ClientHeartbeat(ReadOnlySequence<byte> payload)
         {
-            Bytes = bytes;
         }
+
+        byte[] IMessage.GetPayloadBytes() => Array.Empty<byte>();
     }
 }
